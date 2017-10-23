@@ -81,21 +81,11 @@ class Grit
   end
 
   def rbi_outcome
-    { rbi: [0, rbi_value, 1, 1, 3][total_bases] }
+    { rbi: [0, 0.21, 0.40, 0.62, 1.56][total_bases] }
   end
 
   def total_bases
     @_total_bases ||= batting_line_outcome.fetch(:tb, 0)
-  end
-
-  def rbi_value
-    @_rbi_value ||=
-      case random_number_generator.rand
-      when 0..0.20
-        1
-      else
-        0
-      end
   end
 
   def run_outcome

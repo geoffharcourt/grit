@@ -81,75 +81,22 @@ RSpec.describe Grit do
         expect(simulator.generate_simulated_plate_appearance).
           to match(a_hash_including(ab: 1, h: 1, tb: 4, hr: 1, r: 1, rbi: a_value_between(1, 4)))
       end
+    end
 
-      describe "with RBI potential" do
-        it "geneates an RBI result for singles within the threshold" do
-          random_number_generator = instance_double(Random)
-          allow(random_number_generator).to receive(:rand).and_return(0.0, 0.0, 0.20)
+    describe "RBI generation" do
+      it "returns an RBI result based on the stat line" do
+        random_number_generator = instance_double(Random)
+        rbi_generator = instance_double(Grit::RbiOutcome, generate: 3)
+        allow(Grit::RbiOutcome).to receive(:new).and_return(rbi_generator)
+        allow(random_number_generator).to receive(:rand).and_return(1.0, 0.34)
 
-          simulator = Grit.new(
-            stat_line: stat_line,
-            random_number_generator: random_number_generator,
-          )
+        simulator = Grit.new(
+          stat_line: stat_line,
+          random_number_generator: random_number_generator,
+        )
 
-          expect(simulator.generate_simulated_plate_appearance).
-            to match(a_hash_including(rbi: 1))
-        end
-
-        it "generates a non-RBI result for singles outside the threshold" do
-          random_number_generator = instance_double(Random)
-          allow(random_number_generator).to receive(:rand).and_return(0.0, 0.0, 0.21)
-
-          simulator = Grit.new(
-            stat_line: stat_line,
-            random_number_generator: random_number_generator,
-          )
-
-          expect(simulator.generate_simulated_plate_appearance).
-            to match(a_hash_including(rbi: 0))
-        end
-
-        it "generates an RBI result for doubles" do
-          random_number_generator = instance_double(Random)
-          allow(random_number_generator).to receive(:rand).
-            and_return(double_threshold, 0.0)
-
-          simulator = Grit.new(
-            stat_line: stat_line,
-            random_number_generator: random_number_generator,
-          )
-
-          expect(simulator.generate_simulated_plate_appearance).
-            to match(a_hash_including(rbi: 1))
-        end
-
-        it "generates an RBI result for triples" do
-          random_number_generator = instance_double(Random)
-          allow(random_number_generator).to receive(:rand).
-            and_return(triple_threshold, 0.0)
-
-          simulator = Grit.new(
-            stat_line: stat_line,
-            random_number_generator: random_number_generator,
-          )
-
-          expect(simulator.generate_simulated_plate_appearance).
-            to match(a_hash_including(rbi: 1))
-        end
-
-        it "generates a 3 RBI result for home runs" do
-          random_number_generator = instance_double(Random)
-          allow(random_number_generator).to receive(:rand).
-            and_return(home_run_threshold, 0.0)
-
-          simulator = Grit.new(
-            stat_line: stat_line,
-            random_number_generator: random_number_generator,
-          )
-
-          expect(simulator.generate_simulated_plate_appearance).
-            to match(a_hash_including(rbi: 3))
-        end
+        expect(simulator.generate_simulated_plate_appearance).
+          to match(a_hash_including(rbi: 3))
       end
     end
 

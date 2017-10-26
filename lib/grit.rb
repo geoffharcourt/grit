@@ -1,4 +1,5 @@
 require "grit/version"
+require "grit/rbi_outcome"
 
 class Grit
   def initialize(random_number_generator:, stat_line:)
@@ -9,7 +10,7 @@ class Grit
   def generate_simulated_plate_appearance
     batting_line_outcome.
       merge(run_outcome).
-      merge(rbi_outcome).
+      merge({ rbi: rbi }).
       merge(baserunning_outcome)
   end
 
@@ -66,13 +67,13 @@ class Grit
       when home_run_range
         { ab: 1, h: 1, tb: 4, hr: 1, r: 1 }
       when 0..(h_rate + bb_rate)
-        { ab: 0, bb: 1 }
+        { ab: 0, bb: 1, tb: 0 }
       when 0..on_base_percentage
-        { ab: 0, hbp: 1 }
+        { ab: 0, hbp: 1, tb: 0 }
       when 0..(on_base_percentage + non_ab_out_rate)
-        { ab: 0, bb: 0, h: 0, hbp: 0 }
+        { ab: 0, bb: 0, h: 0, hbp: 0, tb: 0 }
       else
-        { ab: 1, r: 0 }
+        { ab: 1, r: 0, tb: 0 }
       end
   end
 
@@ -80,8 +81,8 @@ class Grit
     (h_1b_rate + h_2b_rate + h_3b_rate)..(h_1b_rate + h_2b_rate + h_3b_rate + hr_rate)
   end
 
-  def rbi_outcome
-    { rbi: [0, 0.21, 0.40, 0.62, 1.56][total_bases] }
+  def rbi
+    @_rbi ||= Grit::RbiOutcome.new(batting_line_outcome).generate
   end
 
   def total_bases

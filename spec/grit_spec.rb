@@ -271,6 +271,34 @@ RSpec.describe Grit do
           to match(a_hash_including(ab: 0, h: 0, bb: 0, hbp: 0))
       end
     end
+
+    context "with a streakiness adjustment" do
+      it "applies the streakiness adjustment to the outcome" do
+        single_random_number_generator = instance_double(Random, rand: single_threshold + 0.01)
+        down_bump = -0.01
+
+        down_bump_simulator = Grit.new(
+          stat_line: stat_line,
+          random_number_generator: single_random_number_generator,
+          bump: down_bump,
+        )
+
+        expect(down_bump_simulator.generate_simulated_plate_appearance).
+          to match(a_hash_including(ab: 1, h: 1, tb: 1))
+
+        double_random_number_generator = instance_double(Random, rand: double_threshold - 0.01)
+        up_bump = 0.01
+
+        up_bump_simulator = Grit.new(
+          stat_line: stat_line,
+          random_number_generator: double_random_number_generator,
+          bump: up_bump,
+        )
+
+        expect(up_bump_simulator.generate_simulated_plate_appearance).
+          to match(a_hash_including(ab: 1, h: 1, tb: 2))
+      end
+    end
   end
 
   def single_threshold

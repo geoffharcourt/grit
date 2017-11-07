@@ -2,21 +2,22 @@ require "grit/version"
 require "grit/rbi_outcome"
 
 class Grit
-  def initialize(random_number_generator:, stat_line:)
+  def initialize(random_number_generator:, stat_line:, bump: 0.0)
     @random_number_generator = random_number_generator
     @stat_line = stat_line
+    @bump = bump
   end
 
   def generate_simulated_plate_appearance
     batting_line_outcome.
       merge(run_outcome).
-      merge({ rbi: rbi }).
+      merge(rbi: rbi).
       merge(baserunning_outcome)
   end
 
   private
 
-  attr_reader :random_number_generator, :stat_line
+  attr_reader :bump, :random_number_generator, :stat_line
 
   def baserunning_outcome
     @_baserunning_outcome ||=
@@ -58,7 +59,7 @@ class Grit
   def batting_line_outcome
     @_batting_line_outcome ||=
       case random_event
-      when 0..h_1b_rate
+      when -1..h_1b_rate
         { ab: 1, h: 1, tb: 1 }
       when 0..(h_1b_rate + h_2b_rate)
         { ab: 1, h: 1, tb: 2 }
@@ -82,7 +83,7 @@ class Grit
   end
 
   def rbi
-    @_rbi ||= Grit::RbiOutcome.new(batting_line_outcome).generate
+    @_rbi ||= Grit::RbiOutcome.new(batting_line_outcome, bump).generate
   end
 
   def total_bases
@@ -101,7 +102,7 @@ class Grit
   end
 
   def run_value
-    @_run_value ||= if random_number_generator.rand < run_threshold
+    @_run_value ||= if random_number_generator.rand + bump < run_threshold
       1
     else
       0

@@ -1,11 +1,12 @@
 class Grit::RbiOutcome
-  def initialize(stat_line)
+  def initialize(stat_line, bump)
     @stat_line = stat_line
+    @bump = bump
   end
 
   def generate
     return 0 if stat_line.fetch(:k, 0) == 1
-    case random_number
+    case random_number + (0.10 * bump)
     when zero_rbi_range(tb)
       then 0
     when one_rbi_range(tb)
@@ -20,7 +21,7 @@ class Grit::RbiOutcome
 
   private
 
-  attr_reader :stat_line
+  attr_reader :bump, :stat_line
 
   def tb
     return 5 if stat_line.fetch(:hbp, 0) == 1
@@ -34,7 +35,7 @@ class Grit::RbiOutcome
   end
 
   def zero_rbi_range(bases)
-    [0..1.0, 0..0.818, 0..0.685, 0..0.575, 1.1, 0..0.976, 0..0.982, 0..0.410][bases]
+    [-1..1.0, -1..0.818, -1..0.685, -1..0.575, 1.1, -1..0.976, -1..0.982, -1..0.410][bases]
   end
 
   def one_rbi_range(bases)
@@ -46,6 +47,6 @@ class Grit::RbiOutcome
   end
 
   def three_rbi_range(bases)
-    [-1, 0.999..1.0, 0.991..1.0, 0.955..1.0, 0.867..0.978][bases]
+    [-1, 0.999..(1.0 + bump), 0.991..(1.0 + bump), 0.955..(1.0 + bump), 0.867..(0.978 + bump)][bases]
   end
 end
